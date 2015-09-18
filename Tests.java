@@ -141,4 +141,21 @@ public class Tests {
 		}
 		return (1 + maxDepth);
 	}
+
+	@Test
+	public void testSearch() {
+		BPlusTree<Character, String> tree = new BPlusTree<>();
+        Character alphabet[] = new Character[]{'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n',
+                'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'};
+        String alphabetStrings[] = new String[alphabet.length];
+        for (int i = 0; i < alphabet.length; i++) {
+            alphabetStrings[i] = (alphabet[i]).toString();
+        }
+
+        Utils.bulkInsert(tree, alphabet, alphabetStrings);
+
+        for (int i = 0; i < alphabet.length; i++) {
+            assertEquals(alphabet[i].toString(), tree.search(alphabet[i]));
+        }
+    }
 }

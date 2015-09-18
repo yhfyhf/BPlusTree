@@ -27,7 +27,7 @@ public class IndexNode<K extends Comparable<K>, T> extends Node<K,T> {
 	/**
 	 * insert the entry into this node at the specified index so that it still
 	 * remains sorted
-	 * 
+	 *
 	 * @param e
 	 * @param index
 	 */
