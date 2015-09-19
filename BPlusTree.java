@@ -9,16 +9,16 @@ import java.util.Map.Entry;
  */
 public class BPlusTree<K extends Comparable<K>, T> {
 
-	public Node<K,T> root;
-	public static final int D = 2;
+    public Node<K,T> root;
+    public static final int D = 2;
 
-	/**
-	 * TODO Search the value for a specific key
-	 * 
-	 * @param key
-	 * @return value
-	 */
-	public T search(K key) {
+    /**
+     * TODO Search the value for a specific key
+     * 
+     * @param key
+     * @return value
+     */
+    public T search(K key) {
         return search(root, key);
     }
 
@@ -29,27 +29,26 @@ public class BPlusTree<K extends Comparable<K>, T> {
      * @param key
      * @return
      */
-	private T search(Node<K, T> root, K key) {
+    private T search(Node<K, T> root, K key) {
         // recursively
-		if (root.isLeafNode) {
-			for (int i = 0; i < root.keys.size(); i++) {
-				if (key.compareTo(root.keys.get(i)) == 0) {
-					return ((LeafNode<K, T>) root).values.get(i);
-				}
-			}
-			return null;
-		}
+        if (root.isLeafNode) {
+            for (int i = 0; i < root.keys.size(); i++) {
+                if (key.compareTo(root.keys.get(i)) == 0) {
+                    return ((LeafNode<K, T>) root).values.get(i);
+                }
+            }
+            return null;
+        }
 
-		IndexNode<K, T> indexNodeRoot = (IndexNode<K, T>) root;
-		int numKeys = indexNodeRoot.keys.size();
-		if (key.compareTo(root.keys.get(0)) < 0) {
-			return search(indexNodeRoot.children.get(0), key);
-		} else if (key.compareTo(root.keys.get(numKeys - 1)) >= 0) {
-			return search(indexNodeRoot.children.get(numKeys), key);
-		} else {
-			for (int i = 0; i < numKeys; i++) {
-                if (key.compareTo(indexNodeRoot.keys.get(i)) >= 0 &&    // 这行可能可以删，两边的边界可能可以删一边
-                        key.compareTo(indexNodeRoot.keys.get(i + 1)) < 0) {
+        IndexNode<K, T> indexNodeRoot = (IndexNode<K, T>) root;
+        int numKeys = indexNodeRoot.keys.size();
+        if (key.compareTo(root.keys.get(0)) < 0) {
+            return search(indexNodeRoot.children.get(0), key);
+        } else if (key.compareTo(root.keys.get(numKeys - 1)) >= 0) {
+            return search(indexNodeRoot.children.get(numKeys), key);
+        } else {
+            for (int i = 0; i < numKeys; i++) {
+                if (key.compareTo(indexNodeRoot.keys.get(i + 1)) < 0) {
                     return search(indexNodeRoot.children.get(i + 1), key);
                 }
             }
@@ -87,13 +86,13 @@ public class BPlusTree<K extends Comparable<K>, T> {
         return null;
     }
 
-	/**
-	 * TODO Insert a key/value pair into the BPlusTree
-	 * 
-	 * @param key
-	 * @param value
-	 */
-	public void insert(K key, T value) {
+    /**
+     * TODO Insert a key/value pair into the BPlusTree
+     * 
+     * @param key
+     * @param value
+     */
+    public void insert(K key, T value) {
         if (root == null) {
             root = new LeafNode<K, T>(key, value);
         } else {
@@ -136,8 +135,7 @@ public class BPlusTree<K extends Comparable<K>, T> {
                 overflow = insert(index.children.get(numKeys), key, value);
             } else {
                 for (int i = 0; i < numKeys; i++) {
-                    if (key.compareTo(index.keys.get(i)) >= 0 &&   // 这行可能可以删，两边的边界可能可以删一边
-                            key.compareTo(index.keys.get(i + 1)) < 0) {
+                    if (key.compareTo(index.keys.get(i + 1)) < 0) {
                         overflow = insert(index.children.get(i + 1), key, value);
                         break;
                     }
@@ -173,14 +171,14 @@ public class BPlusTree<K extends Comparable<K>, T> {
         return overflow;
     }
 
-	/**
-	 * TODO Split a leaf node and return the new right node and the splitting
-	 * key as an Entry<slitingKey, RightNode>
-	 * 
-	 * @param leaf, any other relevant data
-	 * @return the key/node pair as an Entry
-	 */
-	public Entry<K, Node<K,T>> splitLeafNode(LeafNode<K,T> leaf) {
+    /**
+     * TODO Split a leaf node and return the new right node and the splitting
+     * key as an Entry<slitingKey, RightNode>
+     * 
+     * @param leaf, any other relevant data
+     * @return the key/node pair as an Entry
+     */
+    public Entry<K, Node<K,T>> splitLeafNode(LeafNode<K,T> leaf) {
         assert leaf.isOverflowed();
         LeafNode<K, T> newLeaf = new LeafNode<>(
                 new ArrayList<>(leaf.keys.subList(D, 2 * D + 1)),
@@ -197,14 +195,14 @@ public class BPlusTree<K extends Comparable<K>, T> {
         return new AbstractMap.SimpleEntry<>(newLeaf.keys.get(0), newLeaf);
     }
 
-	/**
-	 * TODO split an indexNode and return the new right node and the splitting
-	 * key as an Entry<slitingKey, RightNode>
-	 * 
-	 * @param index, any other relevant data
-	 * @return new key/node pair as an Entry
-	 */
-	public Entry<K, Node<K,T>> splitIndexNode(IndexNode<K,T> index) {
+    /**
+     * TODO split an indexNode and return the new right node and the splitting
+     * key as an Entry<slitingKey, RightNode>
+     * 
+     * @param index, any other relevant data
+     * @return new key/node pair as an Entry
+     */
+    public Entry<K, Node<K,T>> splitIndexNode(IndexNode<K,T> index) {
         assert index.isOverflowed();
         IndexNode<K, T> newIndex = new IndexNode<>(
                 new ArrayList<>(index.keys.subList(D + 1, 2 * D + 1)),
@@ -216,48 +214,48 @@ public class BPlusTree<K extends Comparable<K>, T> {
         return ret;
     }
 
-	/**
-	 * TODO Delete a key/value pair from this B+Tree
-	 * 
-	 * @param key
-	 */
-	public void delete(K key) {
+    /**
+     * TODO Delete a key/value pair from this B+Tree
+     * 
+     * @param key
+     */
+    public void delete(K key) {
 
-	}
+    }
 
-	/**
-	 * TODO Handle LeafNode Underflow (merge or redistribution)
-	 * 
-	 * @param left
-	 *            : the smaller node
-	 * @param right
-	 *            : the bigger node
-	 * @param parent
-	 *            : their parent index node
-	 * @return the splitkey position in parent if merged so that parent can
-	 *         delete the splitkey later on. -1 otherwise
-	 */
-	public int handleLeafNodeUnderflow(LeafNode<K,T> left, LeafNode<K,T> right,
-			IndexNode<K,T> parent) {
-		return -1;
+    /**
+     * TODO Handle LeafNode Underflow (merge or redistribution)
+     * 
+     * @param left
+     *            : the smaller node
+     * @param right
+     *            : the bigger node
+     * @param parent
+     *            : their parent index node
+     * @return the splitkey position in parent if merged so that parent can
+     *         delete the splitkey later on. -1 otherwise
+     */
+    public int handleLeafNodeUnderflow(LeafNode<K,T> left, LeafNode<K,T> right,
+            IndexNode<K,T> parent) {
+        return -1;
 
-	}
+    }
 
-	/**
-	 * TODO Handle IndexNode Underflow (merge or redistribution)
-	 * 
-	 * @param left
-	 *            : the smaller node
-	 * @param right
-	 *            : the bigger node
-	 * @param parent
-	 *            : their parent index node
-	 * @return the splitkey position in parent if merged so that parent can
-	 *         delete the splitkey later on. -1 otherwise
-	 */
-	public int handleIndexNodeUnderflow(IndexNode<K,T> leftIndex,
-			IndexNode<K,T> rightIndex, IndexNode<K,T> parent) {
-		return -1;
-	}
+    /**
+     * TODO Handle IndexNode Underflow (merge or redistribution)
+     * 
+     * @param left
+     *            : the smaller node
+     * @param right
+     *            : the bigger node
+     * @param parent
+     *            : their parent index node
+     * @return the splitkey position in parent if merged so that parent can
+     *         delete the splitkey later on. -1 otherwise
+     */
+    public int handleIndexNodeUnderflow(IndexNode<K,T> leftIndex,
+            IndexNode<K,T> rightIndex, IndexNode<K,T> parent) {
+        return -1;
+    }
 
 }
