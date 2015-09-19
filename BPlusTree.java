@@ -19,30 +19,16 @@ public class BPlusTree<K extends Comparable<K>, T> {
 	 * @return value
 	 */
 	public T search(K key) {
-        /*
-        // iteratively
-        Node<K, T> node = root;
-        while (!node.isLeafNode) {
-            for (int i = 0; i < node.keys.size(); i++) {
-                if (key.compareTo(node.keys.get(i)) < 0) {
-                    node = ((IndexNode<K, T>) node).children.get(i);
-                    break;
-                }
-            }
-            if (key.compareTo(node.keys.get(node.keys.size() - 1)) > 0) {
-                node = ((IndexNode<K, T>) node).children.get(node.keys.size());
-            }
-        }
-        LeafNode<K, T> leafNode = (LeafNode<K, T>) node;
-        for (int i = 0; i < leafNode.keys.size(); i++) {
-            if (leafNode.keys.get(i).compareTo(key) == 0) {
-                return leafNode.values.get(i);
-            }
-        }
-        return null;*/
         return search(root, key);
     }
 
+    /**
+     * Helper method for search, which search recursively from root.
+     *
+     * @param root
+     * @param key
+     * @return
+     */
 	private T search(Node<K, T> root, K key) {
         // recursively
 		if (root.isLeafNode) {
@@ -69,6 +55,35 @@ public class BPlusTree<K extends Comparable<K>, T> {
             }
         }
 
+        return null;
+    }
+
+    /**
+     * Another implementation of search, which search iteratively.
+     *
+     * @param key
+     * @return
+     */
+    public T search2(K key) {
+        Node<K, T> node = root;
+        while (!node.isLeafNode) {
+            if (key.compareTo(node.keys.get(node.keys.size() - 1)) >= 0) {
+                node = ((IndexNode<K, T>) node).children.get(node.keys.size());
+                continue;
+            }
+            for (int i = 0; i < node.keys.size(); i++) {
+                if (key.compareTo(node.keys.get(i)) < 0) {
+                    node = ((IndexNode<K, T>) node).children.get(i);
+                    break;
+                }
+            }
+        }
+        LeafNode<K, T> leafNode = (LeafNode<K, T>) node;
+        for (int i = 0; i < leafNode.keys.size(); i++) {
+            if (leafNode.keys.get(i).compareTo(key) == 0) {
+                return leafNode.values.get(i);
+            }
+        }
         return null;
     }
 
@@ -197,7 +212,7 @@ public class BPlusTree<K extends Comparable<K>, T> {
         );
         Entry<K, Node<K, T>> ret = new AbstractMap.SimpleEntry<>(index.keys.get(D), newIndex);
         index.keys.subList(D, 2 * D + 1).clear();
-        index.children.subList(D + 1, 2 * D + 1).clear();
+        index.children.subList(D + 1, 2 * D + 2).clear();
         return ret;
     }
 

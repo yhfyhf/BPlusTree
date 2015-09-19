@@ -154,8 +154,37 @@ public class Tests {
 
         Utils.bulkInsert(tree, alphabet, alphabetStrings);
 
+        String correct = "@g/m/s/@%%@c/e/@@i/k/@@o/q/@@u/w/@%%[(a,a);(b,b);]#[(c,c);(d,d);]#[(e,e);(f,f);]$[(g,g);(h,h);]#[(i,i);(j,j);]#[(k,k);(l,l);]$[(m,m);(n,n);]#[(o,o);(p,p);]#[(q,q);(r,r);]$[(s,s);(t,t);]#[(u,u);(v,v);]#[(w,w);(x,x);(y,y);(z,z);]$%%";
+        assertEquals(correct, Utils.outputTree(tree));
+
+        // test recursively search
         for (int i = 0; i < alphabet.length; i++) {
             assertEquals(alphabet[i].toString(), tree.search(alphabet[i]));
+        }
+
+        // test iteratively search
+        for (int i = 0; i < alphabet.length; i++) {
+            assertEquals(alphabet[i].toString(), tree.search2(alphabet[i]));
+        }
+    }
+
+    @Test
+    public void testSearch2() {
+        BPlusTree<Integer, String> tree = new BPlusTree<>();
+        int primeNumbers[] = new int[]{2, 3, 5, 7, 11, 13, 19, 23, 37, 41, 43, 47, 53, 59, 67, 71, 61, 73, 79, 89,
+                97, 101, 103, 109, 29, 31, 113, 127, 131, 137, 139, 149, 151, 157, 163, 167, 173, 179, 17, 83, 107};
+        for (int i = 0; i < primeNumbers.length; i++) {
+            tree.insert(primeNumbers[i], String.valueOf(primeNumbers[i]));
+        }
+
+        // test recursively search
+        for (int i = 0; i < primeNumbers.length; i++) {
+            assertEquals(String.valueOf(primeNumbers[i]), tree.search(primeNumbers[i]));
+        }
+
+        // test iteratively search
+        for (int i = 0; i < primeNumbers.length; i++) {
+            assertEquals(String.valueOf(primeNumbers[i]), tree.search2(primeNumbers[i]));
         }
     }
 }
