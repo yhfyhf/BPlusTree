@@ -14,7 +14,7 @@ public class BPlusTree<K extends Comparable<K>, T> {
 
     /**
      * TODO Search the value for a specific key
-     * 
+     *
      * @param key
      * @return value
      */
@@ -88,7 +88,7 @@ public class BPlusTree<K extends Comparable<K>, T> {
 
     /**
      * TODO Insert a key/value pair into the BPlusTree
-     * 
+     *
      * @param key
      * @param value
      */
@@ -174,7 +174,7 @@ public class BPlusTree<K extends Comparable<K>, T> {
     /**
      * TODO Split a leaf node and return the new right node and the splitting
      * key as an Entry<slitingKey, RightNode>
-     * 
+     *
      * @param leaf, any other relevant data
      * @return the key/node pair as an Entry
      */
@@ -198,7 +198,7 @@ public class BPlusTree<K extends Comparable<K>, T> {
     /**
      * TODO split an indexNode and return the new right node and the splitting
      * key as an Entry<slitingKey, RightNode>
-     * 
+     *
      * @param index, any other relevant data
      * @return new key/node pair as an Entry
      */
@@ -216,7 +216,7 @@ public class BPlusTree<K extends Comparable<K>, T> {
 
     /**
      * TODO Delete a key/value pair from this B+Tree
-     * 
+     *
      * @param key
      */
     public void delete(K key) {
@@ -225,7 +225,7 @@ public class BPlusTree<K extends Comparable<K>, T> {
 
     /**
      * TODO Handle LeafNode Underflow (merge or redistribution)
-     * 
+     *
      * @param left
      *            : the smaller node
      * @param right
@@ -236,14 +236,14 @@ public class BPlusTree<K extends Comparable<K>, T> {
      *         delete the splitkey later on. -1 otherwise
      */
     public int handleLeafNodeUnderflow(LeafNode<K,T> left, LeafNode<K,T> right,
-            IndexNode<K,T> parent) {
+                                       IndexNode<K,T> parent) {
         return -1;
 
     }
 
     /**
      * TODO Handle IndexNode Underflow (merge or redistribution)
-     * 
+     *
      * @param left
      *            : the smaller node
      * @param right
@@ -254,7 +254,7 @@ public class BPlusTree<K extends Comparable<K>, T> {
      *         delete the splitkey later on. -1 otherwise
      */
     public int handleIndexNodeUnderflow(IndexNode<K,T> leftIndex,
-            IndexNode<K,T> rightIndex, IndexNode<K,T> parent) {
+                                        IndexNode<K,T> rightIndex, IndexNode<K,T> parent) {
         return -1;
     }
 
