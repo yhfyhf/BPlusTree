@@ -220,7 +220,12 @@ public class BPlusTree<K extends Comparable<K>, T> {
      * @param key
      */
     public void delete(K key) {
-
+        int deleteAt = delete(root, key, null);
+        if (deleteAt != -1) {
+            root.keys.remove(deleteAt);
+            // 这儿还有
+        }
+        // 这儿还有
     }
 
     /**
@@ -229,12 +234,13 @@ public class BPlusTree<K extends Comparable<K>, T> {
      * @param node
      * @param key
      */
-    private void delete(Node<K, T> node, K key, IndexNode<K, T> parent) {
+    private int delete(Node<K, T> node, K key, IndexNode<K, T> parent) {
         int numKeys = node.keys.size();
         int parentIndex = -1;
         if (node != root) {
             parentIndex = parent.children.indexOf(node);
         }
+        int deleteAt = -1;
 
         if (node.isLeafNode) {
             LeafNode<K, T> leaf = (LeafNode<K, T>) node;
@@ -249,18 +255,52 @@ public class BPlusTree<K extends Comparable<K>, T> {
             if (leaf.isUnderflowed() && leaf != root) {
                 if (parentIndex < parent.children.size() - 1) {
                     LeafNode<K, T> right = (LeafNode<K, T>) parent.children.get(parentIndex + 1);
-                    handleLeafNodeUnderflow(leaf, right, parent);
+                    return handleLeafNodeUnderflow(leaf, right, parent);
                 } else {
                     LeafNode<K, T> left = (LeafNode<K, T>) parent.children.get(parentIndex - 1);
-                    handleLeafNodeUnderflow(left, leaf, parent);
+                    return handleLeafNodeUnderflow(left, leaf, parent);
                 }
-            }
-        } else {
-            IndexNode<K, T> index = (IndexNode<K, T>) node;
-            if (index.keys.get(0).compareTo(key) > 0) {
+            } else {
+
+                return -1;
+                //    这儿要写吗？
 
             }
+        } else {
+            // Node is an IndexNode
+            IndexNode<K, T> index = (IndexNode<K, T>) node;
+            if (key.compareTo(index.keys.get(0)) < 0) {
+                deleteAt = delete(index.children.get(0), key, index);
+            } else if (key.compareTo(index.keys.get(numKeys - 1)) >= 0) {
+                deleteAt = delete(index.children.get(numKeys), key, index);
+            } else {
+                for (int i = 0; i < numKeys; i++) {
+                    if (key.compareTo(index.keys.get(i + 1)) < 0) {
+                        deleteAt = delete(index.children.get(i + 1), key, index);
+                    }
+                }
+            }
+
+            if (deleteAt != -1) {
+                if (node == root) {
+                    return parentIndex;   // 这个应该就是-1
+                }
+
+                index.keys.remove(parentIndex);
+
+                if (index.isUnderflowed()) {
+                    if (parentIndex < parent.children.size() - 1) {
+                        IndexNode<K, T> right = (IndexNode<K, T>) parent.children.get(parentIndex + 1);
+                        return handleIndexNodeUnderflow(index, right, parent);
+                    } else {
+                        IndexNode<K, T> left = (IndexNode<K, T>) parent.children.get(parentIndex - 1);
+                        return handleIndexNodeUnderflow(left, index, parent);
+                    }
+                }
+            }
+            return -1;
         }
+
     }
 
     /**
@@ -281,7 +321,7 @@ public class BPlusTree<K extends Comparable<K>, T> {
         assert left.nextLeaf == right;
         assert left == right.previousLeaf;
 
-        int parentIndex = parent.keys.indexOf(right); // index of children refers to right
+        int parentIndex = parent.children.indexOf(right); // index of children refers to right
         if (left.keys.size() + right.keys.size() < 2 * D) {
             // merge
             left.keys.addAll(right.keys);
@@ -292,7 +332,8 @@ public class BPlusTree<K extends Comparable<K>, T> {
                 left.nextLeaf.previousLeaf = left;
             }
 
-            parent.children.remove(parentIndex);
+            parent.keys.remove(parentIndex);
+            parent.children.remove(parentIndex + 1);
             return parentIndex;
         } else {
             // redistribution
@@ -340,12 +381,10 @@ public class BPlusTree<K extends Comparable<K>, T> {
         } else {
             // redistribute
             if (left.isUnderflowed()) {
-                // parent to left, right to parent
                 left.keys.add(parent.keys.remove(parentIndex));
                 parent.keys.add(parentIndex, right.keys.remove(0));
                 left.children.add(right.children.remove(0));
             } else {
-                // parent to right,
                 right.keys.add(0, parent.keys.get(parentIndex));
                 parent.keys.set(parent.keys.size() - 1, left.keys.remove(left.keys.size() - 1));
                 right.children.add(0, left.children.get(left.children.size() - 1));

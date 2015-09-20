@@ -190,4 +190,20 @@ public class Tests {
             assertEquals(String.valueOf(primeNumbers[i]), tree.search2(primeNumbers[i]));
         }
     }
+
+	@Test
+	public void testDelete() {
+		BPlusTree<Integer, String> tree = new BPlusTree<>();
+		int keys[] = new int[]{1, 2, 3, 4};
+		for (int i = 0; i < keys.length; i++) {
+			tree.insert(keys[i], String.valueOf(keys[i]));
+		}
+
+		String correct = "[(1,1);(2,2);(3,3);(4,4);]$%%";
+		assertEquals(correct, Utils.outputTree(tree));
+
+		tree.delete(1);
+        correct = "[(2,2);(3,3);(4,4);]$%%";
+        assertEquals(correct, Utils.outputTree(tree));
+	}
 }
