@@ -223,9 +223,10 @@ public class BPlusTree<K extends Comparable<K>, T> {
         int deleteAt = delete(root, key, null);
         if (deleteAt != -1) {
             root.keys.remove(deleteAt);
-            // 这儿还有
         }
-        // 这儿还有
+        if (root.keys.isEmpty() && !root.isLeafNode){    // 这儿改过
+            root = ((IndexNode<K, T>) root).children.get(0);
+        }
     }
 
     /**
@@ -263,11 +264,11 @@ public class BPlusTree<K extends Comparable<K>, T> {
             } else {
 
                 return -1;
-                //    这儿要写吗？
+                // 这儿要写吗？
 
             }
         } else {
-            // Node is an IndexNode
+            // node is an IndexNode
             IndexNode<K, T> index = (IndexNode<K, T>) node;
             if (key.compareTo(index.keys.get(0)) < 0) {
                 deleteAt = delete(index.children.get(0), key, index);
@@ -277,6 +278,7 @@ public class BPlusTree<K extends Comparable<K>, T> {
                 for (int i = 0; i < numKeys; i++) {
                     if (key.compareTo(index.keys.get(i + 1)) < 0) {
                         deleteAt = delete(index.children.get(i + 1), key, index);
+                        break;
                     }
                 }
             }
@@ -332,8 +334,8 @@ public class BPlusTree<K extends Comparable<K>, T> {
                 left.nextLeaf.previousLeaf = left;
             }
 
-            parent.keys.remove(parentIndex);
-            parent.children.remove(parentIndex + 1);
+            parent.keys.remove(parentIndex - 1);
+            parent.children.remove(parentIndex);
             return parentIndex;
         } else {
             // redistribution
@@ -364,19 +366,15 @@ public class BPlusTree<K extends Comparable<K>, T> {
                                         IndexNode<K,T> right, IndexNode<K,T> parent) {
         assert left.isUnderflowed() || right.isUnderflowed();
 
-        int parentIndex = parent.children.size() - 1; // index of the splitting key in parent node
-        for (int i = 0; i < parent.keys.size() - 1; i++) {
-            if (parent.children.get(i) == left && parent.children.get(i + 1) == right) {
-                parentIndex = i;
-                break;
-            }
-        }
+        int parentIndex = parent.children.indexOf(left);   // index of the splitting key in parent node
+        assert parent.children.get(parentIndex + 1) == right;
 
         if (left.keys.size() + right.keys.size() < 2 * D) {
             // merge
             left.keys.add(parent.keys.remove(parentIndex));
             left.keys.addAll(right.keys);
             left.children.addAll(right.children);
+            parent.children.remove(parentIndex + 1);
             return parentIndex;
         } else {
             // redistribute

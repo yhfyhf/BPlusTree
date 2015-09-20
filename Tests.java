@@ -52,8 +52,9 @@ public class Tests {
 		test = Utils.outputTree(tree);
 		Utils.printTree(tree);
 		correct = "@8/10/12/14/@%%[(4,4);(5,5);(7,7);]#[(8,8);(9,9);]#[(10,10);(11,11);]#[(12,12);(13,13);]#[(14,14);(15,15);(16,16);]$%%";
-		assertEquals(test, correct);
-	}
+        assertEquals(test, correct);
+        // 对了以后删10试试
+    }
 
 	@Test
 	public void testBookExampleShort() {
@@ -204,6 +205,18 @@ public class Tests {
 
 		tree.delete(1);
         correct = "[(2,2);(3,3);(4,4);]$%%";
+        assertEquals(correct, Utils.outputTree(tree));
+
+        tree.delete(2);
+        correct = "[(3,3);(4,4);]$%%";
+        assertEquals(correct, Utils.outputTree(tree));
+
+        tree.delete(4);
+        correct = "[(3,3);]$%%";
+        assertEquals(correct, Utils.outputTree(tree));
+
+        tree.delete(3);
+        correct = "[]$%%";
         assertEquals(correct, Utils.outputTree(tree));
 	}
 }
