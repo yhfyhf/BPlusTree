@@ -224,6 +224,46 @@ public class BPlusTree<K extends Comparable<K>, T> {
     }
 
     /**
+     * Helper method for delete.
+     *
+     * @param node
+     * @param key
+     */
+    private void delete(Node<K, T> node, K key, IndexNode<K, T> parent) {
+        int numKeys = node.keys.size();
+        int parentIndex = -1;
+        if (node != root) {
+            parentIndex = parent.children.indexOf(node);
+        }
+
+        if (node.isLeafNode) {
+            LeafNode<K, T> leaf = (LeafNode<K, T>) node;
+            for (int i = 0; i < numKeys; i++) {
+                if (leaf.keys.get(i).compareTo(key) == 0) {
+                    leaf.keys.remove(i);
+                    leaf.values.remove(i);
+                    break;
+                }
+            }
+
+            if (leaf.isUnderflowed() && leaf != root) {
+                if (parentIndex < parent.children.size() - 1) {
+                    LeafNode<K, T> right = (LeafNode<K, T>) parent.children.get(parentIndex + 1);
+                    handleLeafNodeUnderflow(leaf, right, parent);
+                } else {
+                    LeafNode<K, T> left = (LeafNode<K, T>) parent.children.get(parentIndex - 1);
+                    handleLeafNodeUnderflow(left, leaf, parent);
+                }
+            }
+        } else {
+            IndexNode<K, T> index = (IndexNode<K, T>) node;
+            if (index.keys.get(0).compareTo(key) > 0) {
+
+            }
+        }
+    }
+
+    /**
      * TODO Handle LeafNode Underflow (merge or redistribution)
      *
      * @param left
@@ -237,8 +277,34 @@ public class BPlusTree<K extends Comparable<K>, T> {
      */
     public int handleLeafNodeUnderflow(LeafNode<K,T> left, LeafNode<K,T> right,
                                        IndexNode<K,T> parent) {
-        return -1;
+        assert left.isUnderflowed() || right.isUnderflowed();
+        assert left.nextLeaf == right;
+        assert left == right.previousLeaf;
 
+        int parentIndex = parent.keys.indexOf(right); // index of children refers to right
+        if (left.keys.size() + right.keys.size() < 2 * D) {
+            // merge
+            left.keys.addAll(right.keys);
+            left.values.addAll(right.values);
+
+            left.nextLeaf = right.nextLeaf;
+            if (left.nextLeaf != null) {
+                left.nextLeaf.previousLeaf = left;
+            }
+
+            parent.children.remove(parentIndex);
+            return parentIndex;
+        } else {
+            // redistribution
+            if (left.isUnderflowed()) {
+                left.insertSorted(right.keys.remove(0), right.values.remove(0));
+            } else {
+                right.insertSorted(left.keys.remove(left.keys.size() - 1),
+                        left.values.remove(left.values.size() - 1));
+            }
+            parent.keys.set(parentIndex - 1, parent.children.get(parentIndex).keys.get(0));
+            return -1;
+        }
     }
 
     /**
@@ -253,9 +319,39 @@ public class BPlusTree<K extends Comparable<K>, T> {
      * @return the splitkey position in parent if merged so that parent can
      *         delete the splitkey later on. -1 otherwise
      */
-    public int handleIndexNodeUnderflow(IndexNode<K,T> leftIndex,
-                                        IndexNode<K,T> rightIndex, IndexNode<K,T> parent) {
-        return -1;
+    public int handleIndexNodeUnderflow(IndexNode<K,T> left,
+                                        IndexNode<K,T> right, IndexNode<K,T> parent) {
+        assert left.isUnderflowed() || right.isUnderflowed();
+
+        int parentIndex = parent.children.size() - 1; // index of the splitting key in parent node
+        for (int i = 0; i < parent.keys.size() - 1; i++) {
+            if (parent.children.get(i) == left && parent.children.get(i + 1) == right) {
+                parentIndex = i;
+                break;
+            }
+        }
+
+        if (left.keys.size() + right.keys.size() < 2 * D) {
+            // merge
+            left.keys.add(parent.keys.remove(parentIndex));
+            left.keys.addAll(right.keys);
+            left.children.addAll(right.children);
+            return parentIndex;
+        } else {
+            // redistribute
+            if (left.isUnderflowed()) {
+                // parent to left, right to parent
+                left.keys.add(parent.keys.remove(parentIndex));
+                parent.keys.add(parentIndex, right.keys.remove(0));
+                left.children.add(right.children.remove(0));
+            } else {
+                // parent to right,
+                right.keys.add(0, parent.keys.get(parentIndex));
+                parent.keys.set(parent.keys.size() - 1, left.keys.remove(left.keys.size() - 1));
+                right.children.add(0, left.children.get(left.children.size() - 1));
+            }
+            return -1;
+        }
     }
 
 }
