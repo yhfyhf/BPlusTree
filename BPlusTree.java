@@ -254,17 +254,16 @@ public class BPlusTree<K extends Comparable<K>, T> {
             }
 
             if (leaf.isUnderflowed() && leaf != root) {
-                if (parentIndex < parent.children.size() - 1) {
-                    LeafNode<K, T> right = (LeafNode<K, T>) parent.children.get(parentIndex + 1);
-                    return handleLeafNodeUnderflow(leaf, right, parent);
-                } else {
+                if (parentIndex > 0) {
                     LeafNode<K, T> left = (LeafNode<K, T>) parent.children.get(parentIndex - 1);
                     return handleLeafNodeUnderflow(left, leaf, parent);
+                } else {
+                    LeafNode<K, T> right = (LeafNode<K, T>) parent.children.get(parentIndex + 1);
+                    return handleLeafNodeUnderflow(leaf, right, parent);
                 }
             } else {
                 // no underflow, need not to handle in parent
                 return -1;
-                // 这儿要写吗？
             }
         } else {
             // node is an IndexNode
@@ -290,12 +289,12 @@ public class BPlusTree<K extends Comparable<K>, T> {
                 index.keys.remove(deleteAt);
 
                 if (index.isUnderflowed()) {
-                    if (parentIndex < parent.children.size() - 1) {
-                        IndexNode<K, T> right = (IndexNode<K, T>) parent.children.get(parentIndex + 1);
-                        return handleIndexNodeUnderflow(index, right, parent);
-                    } else {
+                    if (parentIndex > 0) {
                         IndexNode<K, T> left = (IndexNode<K, T>) parent.children.get(parentIndex - 1);
                         return handleIndexNodeUnderflow(left, index, parent);
+                    } else {
+                        IndexNode<K, T> right = (IndexNode<K, T>) parent.children.get(parentIndex + 1);
+                        return handleIndexNodeUnderflow(index, right, parent);
                     }
                 }
             }
@@ -387,6 +386,10 @@ public class BPlusTree<K extends Comparable<K>, T> {
             }
             return -1;
         }
+    }
+
+    public String toString() {
+        return Utils.outputTree(this);
     }
 
 }
