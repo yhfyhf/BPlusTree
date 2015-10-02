@@ -380,9 +380,12 @@ public class BPlusTree<K extends Comparable<K>, T> {
                 parent.keys.add(parentIndex, right.keys.remove(0));
                 left.children.add(right.children.remove(0));
             } else {
+                while (left.keys.size() > D + 1) {
+                    right.keys.add(0, left.keys.remove(left.keys.size() - 1));
+                    right.children.add(0, left.children.remove(left.children.size() - 1));
+                }
                 right.keys.add(0, parent.keys.get(parentIndex));
-                parent.keys.set(parent.keys.size() - 1, left.keys.remove(left.keys.size() - 1));
-                right.children.add(0, left.children.get(left.children.size() - 1));
+                parent.keys.set(parentIndex, left.keys.remove(left.keys.size() - 1));
             }
             return -1;
         }
