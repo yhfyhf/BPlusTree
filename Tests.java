@@ -1,7 +1,6 @@
 import static org.junit.Assert.*;
 
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.*;
 
 import org.junit.Test;
 
@@ -175,7 +174,7 @@ public class Tests {
     @Test
     public void testSearch2() {
         BPlusTree<Integer, String> tree = new BPlusTree<>();
-        int primeNumbers[] = new int[]{2, 3, 5, 7, 11, 13, 19, 23, 37, 41, 43, 47, 53, 59, 67, 71, 61, 73, 79, 89,
+        Integer primeNumbers[] = new Integer[]{2, 3, 5, 7, 11, 13, 19, 23, 37, 41, 43, 47, 53, 59, 67, 71, 61, 73, 79, 89,
                 97, 101, 103, 109, 29, 31, 113, 127, 131, 137, 139, 149, 151, 157, 163, 167, 173, 179, 17, 83, 107};
         for (int i = 0; i < primeNumbers.length; i++) {
             tree.insert(primeNumbers[i], String.valueOf(primeNumbers[i]));
@@ -193,6 +192,23 @@ public class Tests {
         for (int i = 0; i < primeNumbers.length; i++) {
             assertEquals(String.valueOf(primeNumbers[i]), tree.search2(primeNumbers[i]));
         }
+
+		List<Integer> l = new ArrayList<>(Arrays.asList(primeNumbers));
+
+		while (l.size() > 6) {
+//			int idx = new Random().nextInt(l.size() - 1);
+            int idx = 5;
+			tree.delete(l.get(idx));
+            System.out.format("Remove %d at index %d \n", l.get(idx), idx);
+            l.remove(idx);
+            System.out.println("current l is " + l.toString());
+
+            System.out.println(tree);
+
+			for (int num : l) {
+				assertEquals(String.valueOf(num), tree.search(num));
+			}
+		}
     }
 
 	@Test

@@ -1,5 +1,6 @@
 import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Map.Entry;
 
 /**
@@ -32,14 +33,15 @@ public class BPlusTree<K extends Comparable<K>, T> {
     private T search(Node<K, T> root, K key) {
         // recursively
         if (root.isLeafNode) {
-            for (int i = 0; i < root.keys.size(); i++) {
-                if (key.compareTo(root.keys.get(i)) == 0) {
-                    return ((LeafNode<K, T>) root).values.get(i);
-                }
+            int index = Collections.binarySearch(root.keys, key);
+            if (index >= 0) {
+                return ((LeafNode<K, T>) root).values.get(index);
+            } else {
+                return null;
             }
-            return null;
         }
 
+        // root is IndexNode
         IndexNode<K, T> indexNodeRoot = (IndexNode<K, T>) root;
         int numKeys = indexNodeRoot.keys.size();
         if (key.compareTo(root.keys.get(0)) < 0) {
@@ -337,10 +339,14 @@ public class BPlusTree<K extends Comparable<K>, T> {
         } else {
             // redistribution
             if (left.isUnderflowed()) {
-                left.insertSorted(right.keys.remove(0), right.values.remove(0));
+                while (left.keys.size() + 1 < right.keys.size()) {
+                    left.insertSorted(right.keys.remove(0), right.values.remove(0));
+                }
             } else {
-                right.insertSorted(left.keys.remove(left.keys.size() - 1),
-                        left.values.remove(left.values.size() - 1));
+                while (left.keys.size() > right.keys.size()) {
+                    right.insertSorted(left.keys.remove(left.keys.size() - 1),
+                            left.values.remove(left.values.size() - 1));
+                }
             }
             parent.keys.set(parentIndex, parent.children.get(parentIndex + 1).keys.get(0));
             return -1;
@@ -380,11 +386,11 @@ public class BPlusTree<K extends Comparable<K>, T> {
                 parent.keys.add(parentIndex, right.keys.remove(0));
                 left.children.add(right.children.remove(0));
             } else {
-                while (left.keys.size() > D + 1) {
+                right.keys.add(0, parent.keys.get(parentIndex));
+                while (left.keys.size() > right.keys.size() + 1) {
                     right.keys.add(0, left.keys.remove(left.keys.size() - 1));
                     right.children.add(0, left.children.remove(left.children.size() - 1));
                 }
-                right.keys.add(0, parent.keys.get(parentIndex));
                 parent.keys.set(parentIndex, left.keys.remove(left.keys.size() - 1));
             }
             return -1;
