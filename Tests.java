@@ -233,9 +233,5 @@ public class Tests {
         tree.delete(4);
         correct = "[(3,3);]$%%";
         assertEquals(correct, Utils.outputTree(tree));
-
-        tree.delete(3);
-        correct = "[]$%%";
-        assertEquals(correct, Utils.outputTree(tree));
 	}
 }
